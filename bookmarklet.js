@@ -118,26 +118,6 @@
             }
         });
 
-        /** WEEKLY EXCESS */
-        const weekExcessElem = 'week-excess';
-        let excessTotal = 0;
-        // Calculate total weekly working time including today
-        const totalWeekTimeWithToday = weekTotal + ((th * 60) + tm);
-        if (totalWeekTimeWithToday > 45 * 60) { // Assuming 45 hours per week is the limit
-            excessTotal = totalWeekTimeWithToday - (45 * 60); // Convert excess time to minutes
-            const [exh, exm] = calculateTime(excessTotal / 60);
-            addChild({label: `Bu Hafta Fazla Mesai`, value: `${exh} saat, ${exm} dakika`, class: weekExcessElem, style: 'color:red;'});
-        }
-
-        /** DAILY EXCESS */
-        const dayExcessElem = 'day-excess';
-        if (th > 9 || (th === 9 && tm > 0)) { // Assuming 9 hours per day is the limit
-            const [dh, dm] = calculateOvertime((th * 60 + tm) / 60);
-            addChild({label: `Bugün Fazla Mesai`, value: `${dh} saat, ${dm} dakika`, class: dayExcessElem, style: 'color:red;'});
-        }
-
-        // The rest of the existing code remains the same...
-
         const todayRemainingElem = 'today-remaining';
         let th = 0, tm = 0;
         let rh = 9, rm = 0;
@@ -219,6 +199,26 @@
                 addChild({label: `Bugün Çıkış Saati`, value: `Çıkış Yapabilirsiniz!`, style: 'margin-top:15px;'});
             }
         }
+
+        /** WEEKLY EXCESS */
+        const weekExcessElem = 'week-excess';
+        let excessTotal = 0;
+        // Calculate total weekly working time including today
+        const totalWeekTimeWithToday = weekTotal + ((th * 60) + tm);
+        if (totalWeekTimeWithToday > 45 * 60) { // Assuming 45 hours per week is the limit
+            excessTotal = totalWeekTimeWithToday - (45 * 60); // Convert excess time to minutes
+            const [exh, exm] = calculateTime(excessTotal / 60);
+            addChild({label: `Bu Hafta Fazla Mesai`, value: `${exh} saat, ${exm} dakika`, class: weekExcessElem, style: 'color:red;'});
+        }
+
+        /** DAILY EXCESS */
+        const dayExcessElem = 'day-excess';
+        if (th > 9 || (th === 9 && tm > 0)) { // Assuming 9 hours per day is the limit
+            const [dh, dm] = calculateOvertime((th * 60 + tm) / 60);
+            addChild({label: `Bugün Fazla Mesai`, value: `${dh} saat, ${dm} dakika`, class: dayExcessElem, style: 'color:red;'});
+        }
+
+        // The rest of the existing code remains the same...
 
         document.querySelector('#script-notice-box')
             .insertAdjacentHTML('beforeend', `<a href="https://burakdemirtas-jtf.github.io/show-week-working-hours/" target="_blank" style="display:inline-block;padding-bottom:5px;font-size:10px;color:darkgray;">version: ${version} | Check Updates</a>`);
