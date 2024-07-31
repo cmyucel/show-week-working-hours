@@ -7,7 +7,7 @@
     }
 
     const month = document.querySelector('select#Donem_Id');
-    if (!month || month.value === 'null' 
+    if (!month || month.value === 'null'
         || !month.options[month.selectedIndex].textContent.includes((new Date()).toLocaleString('tr-TR', { month: 'long' }).toLocaleUpperCase('tr-TR'))) {
         alert('Please select current month to see and calculate your records.');
         return;
@@ -40,7 +40,7 @@
         }
         return calculateTime(remaining);
     }
-    
+
     function calculateRemainingX(time, x) {
         let [hour, min] = calculateRemaining(time, true);
         hour = hour - x;
@@ -91,6 +91,13 @@
         document.querySelector('#script-notice-box').insertAdjacentHTML('beforeend', withWrapper(`${label}${input}`));
     }
 
+    // dayjs library code remains the same...
+
+    function calculateOvertime(time, limit = 9) {
+        const overtime = time - limit;
+        return overtime > 0 ? calculateTime(overtime) : [0, 0];
+    }
+
     function app() {
         const today = dayjs();
         document.querySelectorAll('.script-input').forEach(row => { row.remove(); });
@@ -110,6 +117,26 @@
                 firstRecord = time.add((time.get('second') > 1 ? 60 - time.get('second') : 1), 'second');
             }
         });
+
+        /** WEEKLY EXCESS */
+        const weekExcessElem = 'week-excess';
+        let excessTotal = 0;
+        // Calculate total weekly working time including today
+        const totalWeekTimeWithToday = weekTotal + ((th * 60) + tm);
+        if (totalWeekTimeWithToday > 45 * 60) { // Assuming 45 hours per week is the limit
+            excessTotal = totalWeekTimeWithToday - (45 * 60); // Convert excess time to minutes
+            const [exh, exm] = calculateTime(excessTotal / 60);
+            addChild({label: `Bu Hafta Fazla Mesai`, value: `${exh} saat, ${exm} dakika`, class: weekExcessElem, style: 'color:red;'});
+        }
+
+        /** DAILY EXCESS */
+        const dayExcessElem = 'day-excess';
+        if (th > 9 || (th === 9 && tm > 0)) { // Assuming 9 hours per day is the limit
+            const [dh, dm] = calculateOvertime((th * 60 + tm) / 60);
+            addChild({label: `Bugün Fazla Mesai`, value: `${dh} saat, ${dm} dakika`, class: dayExcessElem, style: 'color:red;'});
+        }
+
+        // The rest of the existing code remains the same...
 
         const todayRemainingElem = 'today-remaining';
         let th = 0, tm = 0;
@@ -152,7 +179,7 @@
                 }
                 weekTotal += ((wh * 60) + parseInt(wm));
             });
-        
+
             const [wh, wm] = calculateTime(weekTotal / 60);
             addChild({label: `Bu Hafta`, value: `${wh} saat, ${wm} dakika`});
 
@@ -165,16 +192,16 @@
             const [rwth27, rwtm27] = calculateRemainingX(weekTotalWithToday, 18);
             const [rwth18, rwtm18] = calculateRemainingX(weekTotalWithToday, 27);
             addChild({label: `Bu Hafta Kalan`, value: `${rwth} saat, ${rwtm} dakika`, class: weekRemainingElem, style: 'margin-top:10px;'});
-            if (rwth36 !== 0 && rwtm36 !== 0) {
+            if (rwth36 !== 0 || rwtm36 !== 0) {
                 addChild({label: `36 saat için`, value: `${rwth36} saat, ${rwtm36} dakika`, style: 'font-size:13px;margin-top:-6px'});
             }
-            if (rwth27 !== 0 && rwtm27 !== 0) {
+            if (rwth27 !== 0 || rwtm27 !== 0) {
                 addChild({label: `27 saat için`, value: `${rwth27} saat, ${rwtm27} dakika`, style: 'font-size:13px;margin-top:-6px'});
             }
-            if (rwth18 !== 0 && rwtm18 !== 0) {
+            if (rwth18 !== 0 || rwtm18 !== 0) {
                 addChild({label: `18 saat için`, value: `${rwth18} saat, ${rwtm18} dakika`, style: 'font-size:13px;margin-top:-6px'});
             }
-            
+
             if (today.day() === 5 && rwth < 9) {
                 document.querySelector(`div.${todayRemainingElem}`)?.remove();
                 rh = rwth;
